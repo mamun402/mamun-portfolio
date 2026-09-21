@@ -68,6 +68,25 @@ const compactDataUrl = (dataUrl) =>
     image.onerror = () => resolve(dataUrl);
     image.src = dataUrl;
   });
+const compactImageFile = (file, maxDimension = 1800) =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    const objectUrl = URL.createObjectURL(file);
+    image.onload = () => {
+      const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.width * scale));
+      canvas.height = Math.max(1, Math.round(image.height * scale));
+      canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(objectUrl);
+      canvas.toBlob((blob) => {
+        if (!blob) return reject(new Error("Could not optimize image."));
+        resolve(new File([blob], `${file.name.replace(/\.[^/.]+$/, "")}.jpg`, { type: "image/jpeg" }));
+      }, "image/jpeg", 0.82);
+    };
+    image.onerror = () => { URL.revokeObjectURL(objectUrl); reject(new Error("Could not read image.")); };
+    image.src = objectUrl;
+  });
 
 export default function AdminPanel() {
   const [projects, setProjects] = useState(() =>
@@ -183,7 +202,7 @@ export default function AdminPanel() {
   const updateCover = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    try { const cover = await uploadPortfolioAsset(file, "project-covers"); setDraft((current) => ({ ...current, cover })); }
+    try { const cover = await uploadPortfolioAsset(await compactImageFile(file, 1600), "project-covers"); setDraft((current) => ({ ...current, cover })); }
     catch (error) { setMessage(`Image upload failed: ${error.message}`); }
     event.target.value = "";
   };
@@ -191,7 +210,7 @@ export default function AdminPanel() {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
     try {
-      const images = await Promise.all(files.map((file) => uploadPortfolioAsset(file, "flyer-designs")));
+      const images = await Promise.all(files.map(async (file) => uploadPortfolioAsset(await compactImageFile(file, 2000), "flyer-designs")));
       const next = [
       ...designs,
       ...images.map((image, index) => ({
@@ -213,7 +232,7 @@ export default function AdminPanel() {
   const updateProfilePhoto = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    try { persistProfile({ photo: await uploadPortfolioAsset(file, "profile") }); }
+    try { persistProfile({ photo: await uploadPortfolioAsset(await compactImageFile(file, 1600), "profile") }); }
     catch (error) { setMessage(`Photo upload failed: ${error.message}`); }
     event.target.value = "";
   };
