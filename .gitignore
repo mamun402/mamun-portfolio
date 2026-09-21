@@ -1,0 +1,16 @@
+# Dependencies and generated build files
+node_modules/
+dist/
+
+# Environment secrets (keep the safe template tracked)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Local editor and operating-system files
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
