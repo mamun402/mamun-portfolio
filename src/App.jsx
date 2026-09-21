@@ -31,6 +31,7 @@ import {
   readSections,
   readStored,
 } from "./content.js";
+import { emptyPortfolio, loadPortfolio } from "./portfolioStore.js";
 
 const nav = [
   "About",
@@ -184,20 +185,10 @@ function SectionHeading({ eyebrow, title, text }) {
 function App() {
   const [dark, setDark] = useState(false);
   const [menu, setMenu] = useState(false);
-  const [portfolioProjects] = useState(() =>
-    readStored("mamun-projects", initialProjects),
-  );
-  const [portfolioDesigns] = useState(() =>
-    readStored("mamun-designs", initialDesigns),
-  );
-  const [profile] = useState(() => readStored("mamun-profile", initialProfile));
-  const [cv] = useState(() => readStored("mamun-cv", initialCv));
-  const [portfolioContent] = useState(() =>
-    readStored("mamun-content", initialContent),
-  );
+  const [portfolio, setPortfolio] = useState(emptyPortfolio);
+  const { projects: portfolioProjects, designs: portfolioDesigns, profile, cv, content: portfolioContent, sections } = portfolio;
   const cvHref = cv.file || "/Mamun-Ahmed-CV.pdf";
   const [activeDesign, setActiveDesign] = useState(null);
-  const [sections] = useState(readSections);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -208,6 +199,9 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
   }, [dark]);
+  useEffect(() => {
+    loadPortfolio().then((remote) => remote && setPortfolio(remote)).catch((error) => console.error('Could not load portfolio content:', error));
+  }, []);
   useEffect(() => {
     const closeOnEscape = (event) => event.key === "Escape" && setActiveDesign(null);
     window.addEventListener("keydown", closeOnEscape);

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Check,
   Edit3,
@@ -18,6 +18,7 @@ import {
   readStored,
   readSections,
 } from "../content.js";
+import { loadPortfolio, savePortfolio, uploadPortfolioAsset } from "../portfolioStore.js";
 
 const emptyProject = {
   title: "",
@@ -89,10 +90,22 @@ export default function AdminPanel() {
   const [designTitle, setDesignTitle] = useState("");
   const [message, setMessage] = useState("");
 
+  useEffect(() => {
+    loadPortfolio().then((remote) => {
+      if (!remote) return;
+      setProjects(remote.projects); setDesigns(remote.designs); setProfile(remote.profile);
+      setCv(remote.cv); setSections(remote.sections); setContent(remote.content);
+    }).catch((error) => setMessage(`Could not load shared content: ${error.message}`));
+  }, []);
+
+  const publish = async (next) => {
+    try { await savePortfolio(next); setMessage("Published for all visitors"); }
+    catch (error) { setMessage(`Could not publish: ${error.message}`); }
+  };
+
   const persistContent = (next) => {
     setContent(next);
-    localStorage.setItem("mamun-content", JSON.stringify(next));
-    setMessage("Saved to this browser");
+    publish({ projects, designs, profile, cv, sections, content: next });
   };
   const updateContentList = (key, index, value) =>
     setContent((current) => ({
@@ -102,8 +115,7 @@ export default function AdminPanel() {
       ),
     }));
   const saveContent = () => {
-    localStorage.setItem("mamun-content", JSON.stringify(content));
-    setMessage("Saved to this browser");
+    publish({ projects, designs, profile, cv, sections, content });
   };
   const addContentItem = (key, item) =>
     setContent((current) => ({ ...current, [key]: [...current[key], item] }));
@@ -115,42 +127,20 @@ export default function AdminPanel() {
 
   const persistProjects = (next) => {
     setProjects(next);
-    localStorage.setItem("mamun-projects", JSON.stringify(next));
-    setMessage("Saved to this browser");
+    publish({ projects: next, designs, profile, cv, sections, content });
   };
   const persistSections = (next) => {
     setSections(next);
-    localStorage.setItem("mamun-sections", JSON.stringify(next));
-    setMessage("Saved to this browser");
+    publish({ projects, designs, profile, cv, sections: next, content });
   };
   const persistProfile = (next) => {
-    try {
-      localStorage.setItem("mamun-profile", JSON.stringify(next));
-      setProfile(next);
-      setMessage("Profile photo saved");
-    } catch {
-      setMessage("This image is too large for browser storage. Try a smaller image.");
-    }
+    setProfile(next); publish({ projects, designs, profile: next, cv, sections, content });
   };
   const persistCv = (next) => {
-    try {
-      localStorage.setItem("mamun-cv", JSON.stringify(next));
-      setCv(next);
-      setMessage("CV saved");
-    } catch {
-      setMessage("This PDF is too large for browser storage. Try a smaller file.");
-    }
+    setCv(next); publish({ projects, designs, profile, cv: next, sections, content });
   };
   const persistDesigns = (next) => {
-    try {
-      localStorage.setItem("mamun-designs", JSON.stringify(next));
-      setDesigns(next);
-      setMessage("Saved to this browser");
-    } catch {
-      setMessage(
-        "This image is too large for browser storage. Try a smaller image.",
-      );
-    }
+    setDesigns(next); publish({ projects, designs: next, profile, cv, sections, content });
   };
   const editProject = (project) => {
     setTab("projects");
@@ -193,30 +183,26 @@ export default function AdminPanel() {
   const updateCover = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const cover = await imageToDataUrl(file);
-    setDraft((current) => ({ ...current, cover }));
+    try { const cover = await uploadPortfolioAsset(file, "project-covers"); setDraft((current) => ({ ...current, cover })); }
+    catch (error) { setMessage(`Image upload failed: ${error.message}`); }
     event.target.value = "";
   };
   const uploadDesigns = async (event) => {
     const files = Array.from(event.target.files || []);
     if (!files.length) return;
-    const existing = await Promise.all(
-      designs.map(async (design) => ({
-        ...design,
-        image: await compactDataUrl(design.image),
-      })),
-    );
-    const images = await Promise.all(files.map(imageToDataUrl));
-    const next = [
-      ...existing,
+    try {
+      const images = await Promise.all(files.map((file) => uploadPortfolioAsset(file, "flyer-designs")));
+      const next = [
+      ...designs,
       ...images.map((image, index) => ({
         id: crypto.randomUUID(),
         title: designTitle.trim() || files[index].name.replace(/\.[^/.]+$/, ""),
         category: "Flyer design",
         image,
       })),
-    ];
-    persistDesigns(next);
+      ];
+      persistDesigns(next);
+    } catch (error) { setMessage(`Image upload failed: ${error.message}`); }
     setDesignTitle("");
     event.target.value = "";
   };
@@ -227,15 +213,14 @@ export default function AdminPanel() {
   const updateProfilePhoto = async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    persistProfile({ photo: await imageToDataUrl(file) });
+    try { persistProfile({ photo: await uploadPortfolioAsset(file, "profile") }); }
+    catch (error) { setMessage(`Photo upload failed: ${error.message}`); }
     event.target.value = "";
   };
   const updateCv = (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => persistCv({ file: reader.result, name: file.name });
-    reader.readAsDataURL(file);
+    uploadPortfolioAsset(file, "cv-files").then((fileUrl) => persistCv({ file: fileUrl, name: file.name })).catch((error) => setMessage(`CV upload failed: ${error.message}`));
     event.target.value = "";
   };
 
