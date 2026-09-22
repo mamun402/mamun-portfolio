@@ -14,11 +14,7 @@ export default async function handler(request, response) {
     return response.status(503).json({ error: "Email service is not configured" });
   }
 
-  const configuredFrom = process.env.CONTACT_FROM_EMAIL;
-  const usesUnverifiedMailbox = /@(outlook|hotmail|gmail|yahoo)\./i.test(configuredFrom || "");
-  const from = configuredFrom && !configuredFrom.includes("your-verified-domain.com") && !usesUnverifiedMailbox
-    ? configuredFrom
-    : "Portfolio <onboarding@resend.dev>";
+  const from = "Portfolio <onboarding@resend.dev>";
 
   try {
     const resendResponse = await fetch("https://api.resend.com/emails", {
@@ -40,9 +36,7 @@ export default async function handler(request, response) {
       const providerError = await resendResponse.text();
       console.error("Resend rejected the contact message:", providerError);
       return response.status(502).json({
-        error: from.includes("onboarding@resend.dev")
-          ? "Resend test mode only delivers to the email address used for your Resend account. Verify mamun180@outlook.com in Resend or configure a verified sender domain."
-          : "Email provider rejected the sender. Verify CONTACT_FROM_EMAIL in Resend.",
+        error: "Resend test mode only delivers to the email address used for your Resend account. Verify mamun180@outlook.com in Resend or verify a sending domain.",
       });
     }
 
