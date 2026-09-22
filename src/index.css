@@ -67,7 +67,7 @@ html[data-theme="light"] .button-primary{background:#174ca9;color:#fff;border-co
 
 @media(max-width:700px){
 	.chip-tech{top:56px;right:max(12px,calc(50% - 141px))}
-	.visual-caption{top:auto;right:-10px;bottom:0;left:auto;z-index:2;width:120px;max-width:120px;text-align:right;line-height:1.45}
+	.visual-caption{top:auto;right:-10px;bottom:-10px;left:auto;z-index:2;width:120px;max-width:120px;text-align:right;line-height:1.45}
 	.design-gallery{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px}
 	.design-card>div{padding:9px 8px}
 	.design-card span{font-size:7px;letter-spacing:.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -82,5 +82,5 @@ html[data-theme="light"] .button-primary{background:#174ca9;color:#fff;border-co
 @media(max-width:420px){
 	.chip-tech{top:144px;right:-20px;padding:7px 6px;font-size:8px}
 	.chip-tech svg{width:14px;height:14px}
-	.visual-caption{right:-10px;bottom:0;width:120px;max-width:120px}
+	.visual-caption{right:-10px;bottom:-10px;width:120px;max-width:120px}
 }
