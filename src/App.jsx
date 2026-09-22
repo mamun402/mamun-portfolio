@@ -587,10 +587,6 @@ function App() {
                   onKeyDown={(event) => event.key === "Enter" && setActiveDesign(design)}
                 >
                   <img src={design.image} alt={design.title} />
-                  <div>
-                    <span>{design.category}</span>
-                    <h3>{design.title}</h3>
-                  </div>
                 </article>
               ))
             ) : (
@@ -817,7 +813,6 @@ function App() {
           <button className="design-lightbox-close" onClick={() => setActiveDesign(null)} aria-label="Close full design view"><X size={22} /></button>
           <figure onClick={(event) => event.stopPropagation()}>
             <img src={activeDesign.image} alt={activeDesign.title} />
-            <figcaption>{activeDesign.title}</figcaption>
           </figure>
         </div>
       )}

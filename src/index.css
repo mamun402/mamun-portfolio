@@ -26,3 +26,55 @@ html[data-theme="light"] .button-primary{background:#174ca9;color:#fff;border-co
 .project-links{margin-top:16px;padding-top:12px}
 @media(max-width:700px){.project-art{height:135px}.project-content{padding:16px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+@media(max-width:700px){
+	.site-shell{overflow-x:hidden}
+	.hero{position:relative;min-height:0;overflow:visible}
+	.hero-copy,.hero-visual{min-width:0;max-width:100%}
+	.hero-visual{width:100%;height:515px;transform:none;margin:0 auto;transform-origin:center}
+	.profile-card{width:min(285px,calc(100% - 76px));margin:48px auto 0}
+	.floating-chip{max-width:calc(50% - 8px);padding:10px 11px;font-size:9px;white-space:nowrap}
+	.chip-tech{top:0;right:0}
+	.chip-people{bottom:68px;left:0}
+	.visual-caption{right:0;bottom:8px;max-width:46%;font-size:9px}
+	.projects-grid{grid-template-columns:minmax(0,1fr);gap:18px}
+	.project-card{min-width:0}
+	.project-content h3,.project-content>p{overflow-wrap:anywhere}
+	.project-external-links{flex-wrap:wrap}
+}
+
+@media(max-width:420px){
+	.hero-visual{height:570px}
+	.profile-card{width:min(270px,calc(100% - 62px))}
+	.floating-chip{max-width:calc(50% - 5px);padding:9px 8px}
+	.floating-chip svg{flex:0 0 auto}
+	.visual-caption{max-width:45%;font-size:8px}
+}
+
+.design-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
+.design-card{min-width:0;overflow:hidden;background:var(--surface);border:1px solid var(--line);border-radius:9px;cursor:pointer;transition:transform .2s,border-color .2s}
+.design-card:hover{transform:translateY(-3px);border-color:var(--accent)}
+.design-card img{display:block;width:100%;aspect-ratio:4/5;object-fit:cover;background:var(--surface2)}
+.design-card>div{padding:16px 18px}
+.design-card span{display:block;color:var(--accent);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.design-card h3{margin:7px 0 0;font-size:15px;line-height:1.35}
+.design-empty{grid-column:1/-1;display:grid;place-items:center;min-height:150px;padding:28px;border:1px dashed var(--line);color:var(--muted);text-align:center}
+.design-empty p{margin:10px 0 0;font-size:12px}
+
+@media(max-width:900px){
+	.design-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+@media(max-width:700px){
+	.chip-tech{top:92px;right:max(12px,calc(50% - 141px))}
+	.visual-caption{top:auto;right:max(12px,calc(50% - 141px));bottom:40px;left:auto;z-index:2;max-width:45%;text-align:right}
+	.design-gallery{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px}
+	.design-card>div{padding:9px 8px}
+	.design-card span{font-size:7px;letter-spacing:.6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+	.design-card h3{font-size:10px;line-height:1.25;overflow-wrap:anywhere}
+	.design-card img{aspect-ratio:16/10}
+	.design-lightbox{padding:20px 12px}
+	.design-lightbox figure{width:min(100%,calc(100vw - 24px));min-width:0;max-width:calc(100vw - 24px);max-height:calc(100dvh - 40px);margin:0 auto;overflow:hidden}
+	.design-lightbox img{width:auto!important;min-width:0;max-width:100%!important;max-height:calc(100dvh - 92px)!important;margin:0 auto;object-fit:contain}
+	.design-lightbox figcaption{max-width:100%;text-align:center;overflow-wrap:anywhere}
+}
