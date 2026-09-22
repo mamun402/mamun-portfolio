@@ -196,6 +196,7 @@ function App() {
     message: "",
   });
   const [formNote, setFormNote] = useState("");
+  const [formSending, setFormSending] = useState(false);
   useEffect(() => {
     document.documentElement.dataset.theme = dark ? "dark" : "light";
   }, [dark]);
@@ -208,11 +209,25 @@ function App() {
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, []);
   const update = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault();
-    setFormNote(
-      "Your details are validated. Message sending is not enabled yet—connect an email service or backend before using this form.",
-    );
+    setFormSending(true);
+    setFormNote("");
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not send message");
+      setForm({ name: "", email: "", subject: "", message: "" });
+      setFormNote("Message sent successfully. Thank you for reaching out.");
+    } catch (error) {
+      setFormNote(error.message || "Could not send message. Please try again.");
+    } finally {
+      setFormSending(false);
+    }
   };
   return (
     <div
@@ -789,8 +804,9 @@ function App() {
               <button
                 className="button button-primary form-submit"
                 type="submit"
+                disabled={formSending}
               >
-                Validate message <Send size={16} />
+                {formSending ? "Sending message..." : "Send message"} <Send size={16} />
               </button>
               {formNote && (
                 <p className="form-note" role="status">
@@ -798,8 +814,7 @@ function App() {
                 </p>
               )}
               <p className="form-disclaimer">
-                This form currently validates your entries only. Email delivery
-                requires a configured backend or email service.
+                Your message will be sent directly to Mamun Ahmed's email.
               </p>
             </form>
           </div>
