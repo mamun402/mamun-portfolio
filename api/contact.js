@@ -15,7 +15,8 @@ export default async function handler(request, response) {
   }
 
   const configuredFrom = process.env.CONTACT_FROM_EMAIL;
-  const from = configuredFrom && !configuredFrom.includes("your-verified-domain.com")
+  const usesUnverifiedMailbox = /@(outlook|hotmail|gmail|yahoo)\./i.test(configuredFrom || "");
+  const from = configuredFrom && !configuredFrom.includes("your-verified-domain.com") && !usesUnverifiedMailbox
     ? configuredFrom
     : "Portfolio <onboarding@resend.dev>";
 
