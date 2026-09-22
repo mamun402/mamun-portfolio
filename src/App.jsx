@@ -456,10 +456,6 @@ function App() {
               </motion.article>
             ))}
           </div>
-          <p className="edit-note">
-            Dates and the Progsity role details are editable placeholders—update
-            them with confirmed information.
-          </p>
         </section>
         <section className="skills section-wrap" id="skills">
           <SectionHeading
