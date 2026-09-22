@@ -14,6 +14,13 @@ export default async function handler(request, response) {
     return response.status(503).json({ error: "Email service is not configured" });
   }
 
+  const from = process.env.CONTACT_FROM_EMAIL;
+  if (!from || from.includes("your-verified-domain.com")) {
+    return response.status(503).json({
+      error: "Configure CONTACT_FROM_EMAIL with an email address from a verified domain",
+    });
+  }
+
   try {
     const resendResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -22,7 +29,7 @@ export default async function handler(request, response) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: process.env.CONTACT_FROM_EMAIL || "Portfolio <onboarding@resend.dev>",
+        from,
         to: [recipient],
         reply_to: email,
         subject: `[Portfolio] ${subject}`,
@@ -31,7 +38,11 @@ export default async function handler(request, response) {
     });
 
     if (!resendResponse.ok) {
-      return response.status(502).json({ error: "Email provider rejected the message" });
+      const providerError = await resendResponse.text();
+      console.error("Resend rejected the contact message:", providerError);
+      return response.status(502).json({
+        error: "Email provider rejected the sender. Verify CONTACT_FROM_EMAIL in Resend.",
+      });
     }
 
     return response.status(200).json({ ok: true });
